@@ -586,7 +586,7 @@
                     cell.className = 'day-cell';
                     cell.innerHTML = `
                         <input type="number" class="time-input" placeholder="0m" min="0" max="999"
-                            value="${cellData.time}" onchange="updateCellData(${cIdx}, ${dIdx}, 'time', this.value)">
+                            value="${cellData.time}" onblur="updateCellData(${cIdx}, ${dIdx}, 'time', this.value)">
                         <select class="confidence-select" onchange="updateCellData(${cIdx}, ${dIdx}, 'confidence', this.value)">
                             <option value="1" ${cellData.confidence === '1' ? 'selected' : ''}>1</option>
                             <option value="2" ${cellData.confidence === '2' ? 'selected' : ''}>2</option>
