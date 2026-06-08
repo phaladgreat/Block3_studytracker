@@ -654,7 +654,31 @@
             masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
             localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
             if (key === 'time' && val !== '') playPopSound();
-            renderWeeklyMatrix();
+            function updateCellData(cIdx, dIdx, key, val) {
+    // 1. Update the data
+    masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
+    localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
+    if (key === 'time' && val !== '') playPopSound();
+
+    // 2. Targeted update instead of full re-render
+    const row = document.querySelector(`.grid-row[data-index="${cIdx}"]`);
+    if (row) {
+        let totalRowMinutes = 0;
+        const weekMatrix = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx];
+        weekMatrix.forEach(dayLog => {
+            totalRowMinutes += Math.min(parseInt(dayLog.time) || 0, DAILY_GOAL);
+        });
+
+        const courseRowTarget = DAILY_GOAL * 7;
+        const rowPct = Math.round((totalRowMinutes / courseRowTarget) * 100);
+        
+        const barFill = row.querySelector('.bar-fill');
+        const pctTxt = row.querySelector('.pct-txt');
+        
+        if (barFill) barFill.style.width = Math.min(rowPct, 100) + '%';
+        if (pctTxt) pctTxt.textContent = rowPct + '%';
+    }
+}
         }
 
         // Summary View Tab Aggregation calculated over exactly 8 weeks
