@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IUHS Block 3 Semester Tracker</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-main: #4a3b40;
+            --text-muted: #8a757d;
+            
+            /* Course Color Profiles */
+            --color-1: #ffadad;
+            --color-2: #ffd166;
+            --color-3: #06d6a0;
+            --color-4: #118ab2;
+            --color-5: #a8dadc;
+            --color-6: #bdb2ff;
+            --color-7: #ffc6ff;
+            --color-8: #ffd6a5;
+            
+            /* Confidence Status Colors */
+            --conf-1: #fee2e2;
+            --conf-5: #d1fae5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 12px;
+        }
+
+        .tracker-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            width: 100%;
+            max-width: 1000px;
+            padding: 30px 24px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3);
+        }
+
+        header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            color: #332429;
+        }
+
+        header .sub-1 {
+            color: var(--text-main);
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        header .sub-2 {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        /* Tabbed Navigation Bar */
+        .nav-tabs-container {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.03);
+            scrollbar-width: thin;
+        }
+
+        .nav-tabs-container::-webkit-scrollbar {
+            height: 4px;
+        }
+        .nav-tabs-container::-webkit-scrollbar-thumb {
+            background: #ffb6c1;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
+            border: 1px solid #f0e4e6;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: #fff;
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background: #ff758f;
+            color: #fff;
+            border-color: #ff758f;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.2);
+        }
+
+        .tab-btn.overview-btn {
+            background: rgba(255, 182, 193, 0.2);
+            color: #cc4466;
+            margin-left: auto;
+        }
+        .tab-btn.overview-btn.active {
+            background: #cc4466;
+            color: #fff;
+        }
+
+        /* Matrix Content View Wrapper */
+        .view-panel {
+            display: none;
+        }
+        .view-panel.active {
+            display: block;
+        }
+
+        /* Main Tracking Grid Layout */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 140px repeat(7, minmax(65px, 1fr)) 90px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .grid-header {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .grid-header .label-left {
+            text-align: left;
+            padding-left: 4px;
+        }
+
+        .course-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Time & Value Cell Configurations */
+        .day-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid #f0e4e6;
+            transition: all 0.2s ease;
+        }
+
+        .day-cell:focus-within {
+            border-color: #ffb6c1;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(255, 182, 193, 0.15);
+        }
+
+        .time-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .time-input::-webkit-outer-spin-button,
+        .time-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .confidence-select {
+            width: 100%;
+            border: none;
+            background: #fff;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 2px;
+            text-align: center;
+            text-align-last: center;
+            outline: none;
+            cursor: pointer;
+            border: 1px solid #f5ebeb;
+        }
+
+        /* Visual Progress Wrappers */
+        .progress-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bar-bg {
+            background: #f0e4e6;
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.35s ease;
+        }
+
+        /* Progress mapping bar targets */
+        .grid-row[data-index="0"] .bar-fill { background: var(--color-1); }
+        .grid-row[data-index="1"] .bar-fill { background: var(--color-2); }
+        .grid-row[data-index="2"] .bar-fill { background: var(--color-3); }
+        .grid-row[data-index="3"] .bar-fill { background: var(--color-4); }
+        .grid-row[data-index="4"] .bar-fill { background: var(--color-5); }
+        .grid-row[data-index="5"] .bar-fill { background: var(--color-6); }
+        .grid-row[data-index="6"] .bar-fill { background: var(--color-7); }
+        .grid-row[data-index="7"] .bar-fill { background: var(--color-8); }
+
+        .pct-txt {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        /* Footer Day Progress Metrics */
+        .daily-progress-row {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 2px dashed rgba(0, 0, 0, 0.05);
+        }
+
+        .daily-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .daily-stat {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ff758f;
+            background: #fff0f3;
+            padding: 6px 0;
+            border-radius: 10px;
+        }
+
+        /* Reflection Framework elements */
+        .reflection-section {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reflection-section label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .reflection-textarea {
+            width: 100%;
+            height: 65px;
+            border: 1px solid #f0e4e6;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            resize: none;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .reflection-textarea:focus {
+            background: #fff;
+            border-color: #ffb6c1;
+            box-shadow: 0 4px 12px rgba(255, 182, 193, 0.15);
+        }
+
+        /* Semester Dashboard Grid Panels */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid #f5ebeb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .summary-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .metric-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: #f7f9fa;
+        }
+
+        .metric-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #332429;
+            margin-top: 4px;
+        }
+
+        .metric-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -4px;
+        }
+
+        /* Mobile Adjustments Rules */
+        @media (max-width: 768px) {
+            .grid-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                background: rgba(255, 255, 255, 0.4);
+                padding: 14px;
+                border-radius: 16px;
+                margin-bottom: 16px;
+            }
+
+            .grid-header { display: none; }
+
+            .course-title {
+                font-size: 1rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+                padding-bottom: 4px;
+                margin-bottom: 4px;
+            }
+
+            .mobile-days-wrapper {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 6px;
+            }
+
+            .day-cell { padding: 4px; }
+            .time-input { font-size: 0.8rem; }
+            .confidence-select { font-size: 0.6rem; }
+
+            .daily-progress-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .daily-label {
+                grid-column: span 4;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tracker-card">
+        <header>
+            <h1>IUHS Block 3 Course Tracker</h1>
+            <p class="sub-1">Build consistency, not perfection.</p>
+            <p class="sub-2">The future is a sum total of habits developed today.</p>
+        </header>
+
+        <div class="nav-tabs-container" id="tabs-bar"></div>
+
+        <div id="weekly-panel-view" class="view-panel active">
+            <div class="grid-row grid-header">
+                <div class="label-left">Courses</div>
+                <div>M</div>
+                <div>T</div>
+                <div>W</div>
+                <div>T</div>
+                <div>F</div>
+                <div>S</div>
+                <div>S</div>
+                <div style="text-align: right;">Prog.</div>
+            </div>
+
+            <div id="tracker-matrix"></div>
+            <div class="grid-row daily-progress-row" id="daily-progress-footer"></div>
+
+            <div class="reflection-section">
+                <label for="daily-reflection">Weekly Reflection Note</label>
+                <textarea id="daily-reflection" class="reflection-textarea" placeholder="Write a brief note on this week's progress, successes, or challenges..."></textarea>
+            </div>
+        </div>
+
+        <div id="overview-panel-view" class="view-panel">
+            <header style="text-align: left; margin-bottom: 20px;">
+                <h2 style="font-size: 1.3rem;">Semester Progress Analytics</h2>
+                <p style="font-size: 0.85rem;">Aggregated evaluation scores across all 8 study tracking weeks.</p>
+            </header>
+            <div class="overview-grid" id="analytics-deck"></div>
+        </div>
+    </div>
+
+    <script>
+        const courses = [
+            "Physiology",
+            "Pharmacology",
+            "Pathology",
+            "Clinic",
+            "Microbiology",
+            "Anatomy",
+            "Embryology",
+            "Lecturio"
+        ];
+
+        const DAILY_GOAL = 45; // Minutes per course daily baseline target
+        let currentActiveWeek = 1; // Operational active tab context indicator
+
+        // Master state multi-week database schema map object mapping weekly keys
+        let masterSemesterData = JSON.parse(localStorage.getItem('semesterCourseDashboardData_v2'));
+        if (!masterSemesterData) {
+            masterSemesterData = {};
+            // Initialize structures matching array values cleanly for exactly 8 weeks
+            for (let w = 1; w <= 8; w++) {
+                masterSemesterData[`week_${w}`] = {
+                    matrix: courses.map(() => Array(7).fill(null).map(() => ({ time: '', confidence: '1' }))),
+                    reflection: ''
+                };
+            }
+        }
+
+        const tabsBar = document.getElementById('tabs-bar');
+        const matrixBody = document.getElementById('tracker-matrix');
+        const footerRow = document.getElementById('daily-progress-footer');
+        const reflectionInput = document.getElementById('daily-reflection');
+        
+        const weeklyViewPanel = document.getElementById('weekly-panel-view');
+        const overviewViewPanel = document.getElementById('overview-panel-view');
+        const analyticsDeck = document.getElementById('analytics-deck');
+
+        function playPopSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(550, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+                osc.start(); osc.stop(ctx.currentTime + 0.08);
+            } catch (e) {}
+        }
+
+        // Generate tab navigation controls dynamically for Weeks 1 to 8
+        function initTabs() {
+            tabsBar.innerHTML = '';
+            for (let w = 1; w <= 8; w++) {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${currentActiveWeek === w ? 'active' : ''}`;
+                btn.textContent = `Week ${w}`;
+                btn.onclick = () => switchTabContext(w);
+                tabsBar.appendChild(btn);
+            }
+
+            // Overview Dashboard Control Element Tab
+            const overviewBtn = document.createElement('button');
+            overviewBtn.className = `tab-btn overview-btn ${currentActiveWeek === 'overview' ? 'active' : ''}`;
+            overviewBtn.textContent = `🏆 Semester Overview`;
+            overviewBtn.onclick = () => switchTabContext('overview');
+            tabsBar.appendChild(overviewBtn);
+        }
+
+        function switchTabContext(targetWeek) {
+            currentActiveWeek = targetWeek;
+            initTabs();
+
+            if (targetWeek === 'overview') {
+                weeklyViewPanel.classList.remove('active');
+                overviewViewPanel.classList.add('active');
+                renderSemesterOverview();
+            } else {
+                overviewViewPanel.classList.remove('active');
+                weeklyViewPanel.classList.add('active');
+                
+                // Fetch context specific values
+                reflectionInput.value = masterSemesterData[`week_${currentActiveWeek}`].reflection || '';
+                renderWeeklyMatrix();
+            }
+        }
+
+        function renderWeeklyMatrix() {
+            matrixBody.innerHTML = '';
+            let dailyMinutesArr = Array(7).fill(0);
+            const currentWeekData = masterSemesterData[`week_${currentActiveWeek}`].matrix;
+
+            courses.forEach((name, cIdx) => {
+                const row = document.createElement('div');
+                row.className = 'grid-row';
+                row.setAttribute('data-index', cIdx);
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'course-title';
+                nameDiv.textContent = name;
+                row.appendChild(nameDiv);
+
+                const daysWrapper = document.createElement('div');
+                daysWrapper.className = 'mobile-days-wrapper';
+
+                let totalRowMinutes = 0;
+
+                for (let dIdx = 0; dIdx < 7; dIdx++) {
+                    const cellData = currentWeekData[cIdx][dIdx];
+                    const minutes = parseInt(cellData.time) || 0;
+                    totalRowMinutes += Math.min(minutes, DAILY_GOAL);
+                    dailyMinutesArr[dIdx] += minutes;
+
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell';
+                    cell.innerHTML = `
+                        <input type="number" class="time-input" placeholder="0m" min="0" max="999"
+                            value="${cellData.time}" onchange="updateCellData(${cIdx}, ${dIdx}, 'time', this.value)">
+                        <select class="confidence-select" onchange="updateCellData(${cIdx}, ${dIdx}, 'confidence', this.value)">
+                            <option value="1" ${cellData.confidence === '1' ? 'selected' : ''}>1</option>
+                            <option value="2" ${cellData.confidence === '2' ? 'selected' : ''}>2</option>
+                            <option value="3" ${cellData.confidence === '3' ? 'selected' : ''}>3</option>
+                            <option value="4" ${cellData.confidence === '4' ? 'selected' : ''}>4</option>
+                            <option value="5" ${cellData.confidence === '5' ? 'selected' : ''}>5</option>
+                        </select>
+                    `;
+                    
+                    if (minutes > 0) {
+                        cell.style.background = cellData.confidence === '5' ? 'var(--conf-5)' : 
+                                                cellData.confidence === '1' ? 'var(--conf-1)' : 'rgba(255,255,255,0.9)';
+                    }
+
+                    if (window.innerWidth <= 768) {
+                        daysWrapper.appendChild(cell);
+                    } else {
+                        row.appendChild(cell);
+                    }
+                }
+
+                if (window.innerWidth <= 768) row.appendChild(daysWrapper);
+
+                const courseRowTarget = DAILY_GOAL * 7;
+                const rowPct = Math.round((totalRowMinutes / courseRowTarget) * 100);
+
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'progress-wrapper';
+                progressDiv.innerHTML = `
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width: ${Math.min(rowPct, 100)}%"></div>
+                    </div>
+                    <div class="pct-txt">${rowPct}%</div>
+                `;
+                row.appendChild(progressDiv);
+                matrixBody.appendChild(row);
+            });
+
+            renderDailyFooterMetrics(dailyMinutesArr);
+        }
+
+        function renderDailyFooterMetrics(dailyMinutesArr) {
+            footerRow.innerHTML = '<div class="daily-label">Day Prog.</div>';
+            const combinedDailyTarget = DAILY_GOAL * courses.length;
+
+            dailyMinutesArr.forEach((totalMins) => {
+                const dayPct = Math.round((totalMins / combinedDailyTarget) * 100);
+                const statCell = document.createElement('div');
+                statCell.className = 'daily-stat';
+                statCell.textContent = `${dayPct}%`;
+                
+                if (dayPct >= 100) {
+                    statCell.style.background = '#e2fdf5';
+                    statCell.style.color = '#059669';
+                }
+                footerRow.appendChild(statCell);
+            });
+
+            if (window.innerWidth > 768) {
+                footerRow.appendChild(document.createElement('div'));
+            }
+        }
+
+        function updateCellData(cIdx, dIdx, key, val) {
+            masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
+            localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
+            if (key === 'time' && val !== '') playPopSound();
+            renderWeeklyMatrix();
+        }
+
+        // Summary View Tab Aggregation calculated over exactly 8 weeks
+        function renderSemesterOverview() {
+            analyticsDeck.innerHTML = '';
+
+            courses.forEach((courseName, cIdx) => {
+                let cumulativeMinutesGained = 0;
+                let validConfidenceScoresSum = 0;
+                let activeDaysCount = 0;
+
+                // Loop over 8 weeks instead of 16
+                for (let w = 1; w <= 8; w++) {
+                    const weeklyMatrix = masterSemesterData[`week_${w}`].matrix[cIdx];
+                    weeklyMatrix.forEach(dayLog => {
+                        const mins = parseInt(dayLog.time) || 0;
+                        cumulativeMinutesGained += Math.min(mins, DAILY_GOAL);
+                        
+                        if (mins > 0) {
+                            validConfidenceScoresSum += parseInt(dayLog.confidence) || 1;
+                            activeDaysCount++;
+                        }
+                    });
+                }
+
+                // Calculate cumulative semester target threshold values (45m * 7 days * 8 weeks)
+                const semesterTotalCourseTarget = DAILY_GOAL * 7 * 8;
+                const totalCoursePct = Math.round((cumulativeMinutesGained / semesterTotalCourseTarget) * 100) || 0;
+                const averageConfidence = activeDaysCount > 0 ? (validConfidenceScoresSum / activeDaysCount).toFixed(1) : 'N/A';
+
+                const card = document.createElement('div');
+                card.className = 'summary-card';
+                card.innerHTML = `
+                    <div class="card-header-flex">
+                        <h3>${courseName}</h3>
+                        <div class="metric-badge" style="background-color: var(--color-${cIdx + 1})">Course ${cIdx + 1}</div>
+                    </div>
+                    <div>
+                        <div class="metric-val">${totalCoursePct}%</div>
+                        <div class="metric-subtitle">Total Progress Met</div>
+                    </div>
+                    <div class="progress-wrapper" style="margin: 4px 0;">
+                        <div class="bar-bg">
+                            <div class="bar-fill" style="width: ${Math.min(totalCoursePct, 100)}%; background-color: var(--color-${cIdx + 1})"></div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-main); margin-top: 4px;">
+                        Avg Confidence Score: <span style="color: #ff758f;">⭐ ${averageConfidence}</span>
+                    </div>
+                `;
+                analyticsDeck.appendChild(card);
+            });
+        }
+
+        // Setup Weekly reflection notes persistence
+        reflectionInput.addEventListener('input', (e) => {
+            if (currentActiveWeek !== 'overview') {
+                masterSemesterData[`week_${currentActiveWeek}`].reflection = e.target.value;
+                localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (currentActiveWeek !== 'overview') renderWeeklyMatrix();
+        });
+
+        // Bootstrap App components state sequence 
+        initTabs();
+        renderWeeklyMatrix();
+    </script>
+</body>
+</html>
