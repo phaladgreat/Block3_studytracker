@@ -479,7 +479,7 @@
         ];
 
         const DAILY_GOAL = 45; // Minutes per course daily baseline target
-        let currentActiveWeek = 1; // Operational active tab context indicator
+        let currentActiveWeek = 1; 
 
         let masterSemesterData = JSON.parse(localStorage.getItem('semesterCourseDashboardData_v2'));
         if (!masterSemesterData) {
@@ -579,7 +579,6 @@
 
                     const cell = document.createElement('div');
                     cell.className = 'day-cell';
-                    // FIX: Changed onchange to onblur to prevent UI re-renders while typing
                     cell.innerHTML = `
                         <input type="number" class="time-input" placeholder="0m" min="0" max="999"
                             value="${cellData.time}" onblur="updateCellData(${cIdx}, ${dIdx}, 'time', this.value)">
@@ -709,8 +708,13 @@
             }
         });
 
+        // FIXED: Only re-render if the WIDTH changes, ignoring height (keyboard) changes
+        let lastWidth = window.innerWidth;
         window.addEventListener('resize', () => {
-            if (currentActiveWeek !== 'overview') renderWeeklyMatrix();
+            if (window.innerWidth !== lastWidth) {
+                lastWidth = window.innerWidth;
+                if (currentActiveWeek !== 'overview') renderWeeklyMatrix();
+            }
         });
 
         initTabs();
