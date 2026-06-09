@@ -25,14 +25,14 @@
         .tab-btn { background: rgba(255, 255, 255, 0.5); border: 1px solid #f0e4e6; padding: 8px 14px; border-radius: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .tab-btn.active { background: #ff758f; color: #fff; }
         .view-panel { display: none; } .view-panel.active { display: block; }
-        .grid-row { display: grid; grid-template-columns: 140px repeat(7, 1fr) 90px; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .grid-row { display: grid; grid-template-columns: 140px repeat(7, minmax(65px, 1fr)) 90px; align-items: center; gap: 10px; margin-bottom: 12px; }
         .grid-header { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); padding-bottom: 10px; border-bottom: 2px solid rgba(0, 0, 0, 0.04); }
         .day-cell { display: flex; flex-direction: column; gap: 4px; background: rgba(255, 255, 255, 0.6); padding: 6px; border-radius: 12px; border: 1px solid #f0e4e6; }
         .time-input { width: 100%; border: none; background: transparent; text-align: center; font-size: 16px; font-weight: 700; color: var(--text-main); outline: none; }
-        .confidence-select { width: 100%; border: 1px solid #f5ebeb; background: #fff; font-size: 12px; border-radius: 6px; }
+        .confidence-select { width: 100%; border: 1px solid #f5ebeb; background: #fff; font-size: 12px; border-radius: 6px; padding: 2px; }
         .bar-fill { height: 6px; border-radius: 10px; transition: width 0.35s ease; }
         .reflection-textarea { width: 100%; height: 65px; border: 1px solid #f0e4e6; background: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px; margin-top: 10px; }
-        @media (max-width: 768px) { .grid-row { grid-template-columns: 1fr; background: rgba(255, 255, 255, 0.4); padding: 14px; border-radius: 16px; } .mobile-days-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; } .grid-header { display: none; } }
+        @media (max-width: 768px) { .grid-row { grid-template-columns: 1fr; background: rgba(255, 255, 255, 0.4); padding: 14px; border-radius: 16px; } .grid-header { display: none; } .mobile-days-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; } }
     </style>
 </head>
 <body>
@@ -44,13 +44,11 @@
         </header>
         <div class="nav-tabs-container" id="tabs-bar"></div>
         <div id="weekly-panel-view" class="view-panel active">
-            <div class="grid-row grid-header" id="header-row"></div>
+            <div class="grid-row grid-header"><div class="label-left">Courses</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div><div style="text-align: right;">Prog.</div></div>
             <div id="tracker-matrix"></div>
             <div class="grid-row daily-progress-row" id="daily-progress-footer"></div>
-            <div class="reflection-section">
-                <label>Weekly Reflection Note</label>
-                <textarea id="daily-reflection" class="reflection-textarea"></textarea>
-            </div>
+            <label style="display:block; margin-top:20px; font-size: 0.85rem; font-weight: 700; color: #8a757d;">WEEKLY REFLECTION NOTE</label>
+            <textarea id="daily-reflection" class="reflection-textarea"></textarea>
         </div>
         <div id="overview-panel-view" class="view-panel">
             <h2>Semester Progress Analytics</h2>
@@ -76,7 +74,8 @@
             }
         }
         function renderWeeklyMatrix() {
-            document.getElementById('tracker-matrix').innerHTML = '';
+            const matrixBody = document.getElementById('tracker-matrix');
+            matrixBody.innerHTML = '';
             courses.forEach((name, cIdx) => {
                 const row = document.createElement('div'); row.className = 'grid-row'; row.setAttribute('data-index', cIdx);
                 row.innerHTML = `<div class="course-title">${name}</div>`;
@@ -84,21 +83,21 @@
                 for(let d=0; d<7; d++) {
                     const dta = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][d];
                     const cell = document.createElement('div'); cell.className = 'day-cell';
-                    cell.innerHTML = `<input type="number" class="time-input" value="${dta.time}" onblur="updateCellData(${cIdx}, ${d}), 'time', this.value)">
+                    cell.innerHTML = `<input type="number" class="time-input" value="${dta.time}" onblur="updateCellData(${cIdx}, ${d}, 'time', this.value)">
                                       <select class="confidence-select" onblur="updateCellData(${cIdx}, ${d}, 'confidence', this.value)">${[1,2,3,4,5].map(n=>`<option value="${n}" ${dta.confidence==n?'selected':''}>${n}</option>`).join('')}</select>`;
                     dw.appendChild(cell);
                 }
                 row.appendChild(dw); row.innerHTML += `<div class="progress-wrapper"><div class="bar-fill" style="background:var(--color-${cIdx+1}); width:0%"></div><div class="pct-txt">0%</div></div>`;
-                document.getElementById('tracker-matrix').appendChild(row);
+                matrixBody.appendChild(row);
             });
         }
         document.getElementById('daily-reflection').addEventListener('input', (e) => {
             masterSemesterData[`week_${currentActiveWeek}`].reflection = e.target.value;
             localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
         });
-        initTabs(); renderWeeklyMatrix();
-        function initTabs() { /* ... tab logic ... */ }
+        function initTabs() { /* tab setup logic */ }
         function switchTabContext(w) { currentActiveWeek = w; renderWeeklyMatrix(); }
+        renderWeeklyMatrix();
     </script>
 </body>
 </html>
