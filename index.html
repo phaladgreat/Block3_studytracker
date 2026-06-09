@@ -650,17 +650,15 @@
             }
         }
 
-        function updateCellData(cIdx, dIdx, key, val) {
-            masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
-            localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
-            if (key === 'time' && val !== '') playPopSound();
-            function updateCellData(cIdx, dIdx, key, val) {
-    // 1. Update the data
+       function updateCellData(cIdx, dIdx, key, val) {
+    // 1. Update the master data
     masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
     localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
+    
+    // 2. Play sound if it's a valid time entry
     if (key === 'time' && val !== '') playPopSound();
 
-    // 2. Targeted update instead of full re-render
+    // 3. Targeted UI update (prevents table flicker)
     const row = document.querySelector(`.grid-row[data-index="${cIdx}"]`);
     if (row) {
         let totalRowMinutes = 0;
