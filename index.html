@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IUHS Block 3 Semester Tracker</title>
+    <title>IUHS Block 3 Study Tracker</title>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
@@ -14,32 +14,47 @@
             --color-5: #a8dadc; --color-6: #bdb2ff; --color-7: #ffc6ff; --color-8: #ffd6a5;
             --conf-1: #fee2e2; --conf-5: #d1fae5;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-gradient); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px 12px; }
-        .tracker-card { background: var(--card-bg); width: 100%; max-width: 1000px; padding: 30px 24px; border-radius: 24px; box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3); }
-        .nav-tabs-container { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 25px; }
-        .tab-btn { background: rgba(255, 255, 255, 0.5); border: 1px solid #f0e4e6; padding: 8px 14px; border-radius: 12px; cursor: pointer; white-space: nowrap; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px 12px; }
+        .tracker-card { background: var(--card-bg); backdrop-filter: blur(12px); width: 100%; max-width: 1000px; padding: 30px 24px; border-radius: 24px; box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3); }
+        header { margin-bottom: 25px; text-align: center; }
+        header h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 6px; color: #332429; }
+        header .sub-1 { font-size: 1.05rem; font-weight: 600; }
+        header .sub-2 { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
+        .nav-tabs-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; border-bottom: 2px solid rgba(0, 0, 0, 0.03); }
+        .tab-btn { background: rgba(255, 255, 255, 0.5); border: 1px solid #f0e4e6; padding: 8px 14px; border-radius: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .tab-btn.active { background: #ff758f; color: #fff; }
         .view-panel { display: none; } .view-panel.active { display: block; }
-        .grid-row { display: grid; grid-template-columns: 140px repeat(7, 1fr) 90px; gap: 10px; margin-bottom: 12px; }
-        .day-cell { display: flex; flex-direction: column; gap: 2px; background: rgba(255, 255, 255, 0.6); padding: 4px; border-radius: 12px; border: 1px solid #f0e4e6; }
-        .time-input { width: 100%; border: none; background: transparent; text-align: center; font-size: 16px; font-weight: 700; outline: none; }
-        .confidence-select { width: 100%; border: none; background: #fff; font-size: 12px; border-radius: 6px; outline: none; }
-        .bar-fill { height: 6px; border-radius: 10px; transition: width 0.3s ease; }
-        @media (max-width: 768px) { 
-            .grid-row { grid-template-columns: 1fr; background: rgba(255, 255, 255, 0.4); padding: 10px; border-radius: 16px; }
-            .mobile-days-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-            .time-input { font-size: 16px; }
-        }
+        .grid-row { display: grid; grid-template-columns: 140px repeat(7, 1fr) 90px; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .grid-header { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); padding-bottom: 10px; border-bottom: 2px solid rgba(0, 0, 0, 0.04); }
+        .day-cell { display: flex; flex-direction: column; gap: 4px; background: rgba(255, 255, 255, 0.6); padding: 6px; border-radius: 12px; border: 1px solid #f0e4e6; }
+        .time-input { width: 100%; border: none; background: transparent; text-align: center; font-size: 16px; font-weight: 700; color: var(--text-main); outline: none; }
+        .confidence-select { width: 100%; border: 1px solid #f5ebeb; background: #fff; font-size: 12px; border-radius: 6px; }
+        .bar-fill { height: 6px; border-radius: 10px; transition: width 0.35s ease; }
+        .reflection-textarea { width: 100%; height: 65px; border: 1px solid #f0e4e6; background: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px; margin-top: 10px; }
+        @media (max-width: 768px) { .grid-row { grid-template-columns: 1fr; background: rgba(255, 255, 255, 0.4); padding: 14px; border-radius: 16px; } .mobile-days-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; } .grid-header { display: none; } }
     </style>
 </head>
 <body>
     <div class="tracker-card">
-        <header><h1>IUHS Block 3 Tracker</h1></header>
+        <header>
+            <h1>IUHS Block 3 Study Tracker</h1>
+            <p class="sub-1">Build consistency, not perfection.</p>
+            <p class="sub-2">The future is a sum total of habits developed today.</p>
+        </header>
         <div class="nav-tabs-container" id="tabs-bar"></div>
         <div id="weekly-panel-view" class="view-panel active">
+            <div class="grid-row grid-header" id="header-row"></div>
             <div id="tracker-matrix"></div>
-            <div id="daily-progress-footer"></div>
+            <div class="grid-row daily-progress-row" id="daily-progress-footer"></div>
+            <div class="reflection-section">
+                <label>Weekly Reflection Note</label>
+                <textarea id="daily-reflection" class="reflection-textarea"></textarea>
+            </div>
+        </div>
+        <div id="overview-panel-view" class="view-panel">
+            <h2>Semester Progress Analytics</h2>
+            <div class="overview-grid" id="analytics-deck"></div>
         </div>
     </div>
     <script>
@@ -47,57 +62,43 @@
         const DAILY_GOAL = 45;
         let currentActiveWeek = 1;
         let masterSemesterData = JSON.parse(localStorage.getItem('semesterCourseDashboardData_v2')) || {};
+        for(let w=1; w<=8; w++) if(!masterSemesterData[`week_${w}`]) masterSemesterData[`week_${w}`] = {matrix: courses.map(()=>Array(7).fill(null).map(()=>({time:'', confidence:'1'}))), reflection:''};
         
-        // Initialize data if empty
-        for (let w = 1; w <= 8; w++) {
-            if (!masterSemesterData[`week_${w}`]) {
-                masterSemesterData[`week_${w}`] = { matrix: courses.map(() => Array(7).fill(null).map(() => ({ time: '', confidence: '1' }))), reflection: '' };
-            }
-        }
-
-        function playPopSound() { /* existing sound code */ }
-
         function updateCellData(cIdx, dIdx, key, val) {
             masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx][key] = val;
             localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
             const row = document.querySelector(`.grid-row[data-index="${cIdx}"]`);
             if (row) {
-                let totalRowMinutes = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx].reduce((acc, curr) => acc + Math.min(parseInt(curr.time) || 0, DAILY_GOAL), 0);
+                let totalRowMinutes = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx].reduce((a, b) => a + Math.min(parseInt(b.time) || 0, DAILY_GOAL), 0);
                 const rowPct = Math.round((totalRowMinutes / (DAILY_GOAL * 7)) * 100);
-                const barFill = row.querySelector('.bar-fill');
-                if (barFill) barFill.style.width = Math.min(rowPct, 100) + '%';
+                row.querySelector('.bar-fill').style.width = Math.min(rowPct, 100) + '%';
+                row.querySelector('.pct-txt').textContent = rowPct + '%';
             }
         }
-
         function renderWeeklyMatrix() {
-            const matrixBody = document.getElementById('tracker-matrix');
-            matrixBody.innerHTML = '';
+            document.getElementById('tracker-matrix').innerHTML = '';
             courses.forEach((name, cIdx) => {
-                const row = document.createElement('div');
-                row.className = 'grid-row';
-                row.setAttribute('data-index', cIdx);
+                const row = document.createElement('div'); row.className = 'grid-row'; row.setAttribute('data-index', cIdx);
                 row.innerHTML = `<div class="course-title">${name}</div>`;
-                const daysWrapper = document.createElement('div');
-                daysWrapper.className = 'mobile-days-wrapper';
-                
-                for (let dIdx = 0; dIdx < 7; dIdx++) {
-                    const cellData = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][dIdx];
-                    const cell = document.createElement('div');
-                    cell.className = 'day-cell';
-                    cell.innerHTML = `
-                        <input type="number" class="time-input" placeholder="0m" value="${cellData.time}" 
-                            onblur="updateCellData(${cIdx}, ${dIdx}, 'time', this.value)">
-                        <select class="confidence-select" onblur="updateCellData(${cIdx}, ${dIdx}, 'confidence', this.value)">
-                            ${[1,2,3,4,5].map(n => `<option value="${n}" ${cellData.confidence == n ? 'selected' : ''}>${n}</option>`).join('')}
-                        </select>`;
-                    daysWrapper.appendChild(cell);
+                const dw = document.createElement('div'); dw.className = 'mobile-days-wrapper';
+                for(let d=0; d<7; d++) {
+                    const dta = masterSemesterData[`week_${currentActiveWeek}`].matrix[cIdx][d];
+                    const cell = document.createElement('div'); cell.className = 'day-cell';
+                    cell.innerHTML = `<input type="number" class="time-input" value="${dta.time}" onblur="updateCellData(${cIdx}, ${d}), 'time', this.value)">
+                                      <select class="confidence-select" onblur="updateCellData(${cIdx}, ${d}, 'confidence', this.value)">${[1,2,3,4,5].map(n=>`<option value="${n}" ${dta.confidence==n?'selected':''}>${n}</option>`).join('')}</select>`;
+                    dw.appendChild(cell);
                 }
-                row.appendChild(daysWrapper);
-                matrixBody.appendChild(row);
+                row.appendChild(dw); row.innerHTML += `<div class="progress-wrapper"><div class="bar-fill" style="background:var(--color-${cIdx+1}); width:0%"></div><div class="pct-txt">0%</div></div>`;
+                document.getElementById('tracker-matrix').appendChild(row);
             });
         }
-        
-        renderWeeklyMatrix();
+        document.getElementById('daily-reflection').addEventListener('input', (e) => {
+            masterSemesterData[`week_${currentActiveWeek}`].reflection = e.target.value;
+            localStorage.setItem('semesterCourseDashboardData_v2', JSON.stringify(masterSemesterData));
+        });
+        initTabs(); renderWeeklyMatrix();
+        function initTabs() { /* ... tab logic ... */ }
+        function switchTabContext(w) { currentActiveWeek = w; renderWeeklyMatrix(); }
     </script>
 </body>
 </html>
